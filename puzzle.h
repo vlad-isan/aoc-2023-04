@@ -16,6 +16,7 @@
 #include "fmt/core.h"
 
 struct Card {
+    uint32_t id;
     std::vector<uint32_t> winning_numbers;
     std::vector<uint32_t> numbers;
 
@@ -36,5 +37,7 @@ int puzzle_2(const std::string &base_file_path);
 int do_puzzle_1(std::ifstream &file);
 
 int do_puzzle_2(std::ifstream &file);
+
+uint32_t get_total_scratchcards(const std::vector<Card> &original_cards, const std::vector<Card> &copy_cards);
 
 #endif //PUZZLE_H

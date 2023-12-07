@@ -90,21 +90,26 @@ int do_puzzle_1(std::ifstream &file) {
 }
 
 int do_puzzle_2(std::ifstream &file) {
+    std::vector<Card> cards;
     std::string line;
 
     while (std::getline(file, line)) {
-        fmt::println("{}", line);
+        cards.emplace_back(line);
     }
 
-    return 0;
+    return get_total_scratchcards(cards, cards);
 }
 
 Card::Card(const std::string &line) {
     size_t colon_pos = line.find(':');
     size_t bar_pos = line.find('|');
 
+    std::istringstream card_id_stream{line.substr(0, colon_pos)};
     std::istringstream winning_stream{line.substr(colon_pos + 2, bar_pos - colon_pos - 2)};
     std::istringstream no_stream{line.substr(bar_pos + 2)};
+
+    std::string discard;
+    card_id_stream >> discard >> this->id;
 
     this->parse_set(this->winning_numbers, winning_stream);
     this->parse_set(this->numbers, no_stream);
@@ -129,4 +134,27 @@ uint32_t Card::get_matches_no() const {
     return std::ranges::count_if(this->numbers, [&](auto &no) {
         return std::ranges::find(this->winning_numbers, no) != this->winning_numbers.end();
     });
+}
+
+uint32_t get_total_scratchcards(const std::vector<Card> &original_cards, const std::vector<Card> &copy_cards) {
+    static uint32_t total = 0;
+    total += copy_cards.size();
+
+    std::vector<Card> copies;
+
+    for(auto &card: copy_cards) {
+        auto matches = card.get_matches_no();
+        auto begin = original_cards.begin() + card.id;
+        auto end = begin + matches;
+
+        copies.insert(copies.end(), begin, end);
+
+        if (copies.size() > 0) {
+            get_total_scratchcards(original_cards, copies);
+        }
+
+        copies.clear();
+    }
+
+    return total;
 }
