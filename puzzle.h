@@ -10,8 +10,20 @@
 #include <fstream>
 #include <iostream>
 #include <ranges>
+#include <sstream>
 #include <string>
+#include <vector>
 #include "fmt/core.h"
+
+struct Card {
+    std::vector<uint32_t> winning_numbers;
+    std::vector<uint32_t> numbers;
+
+    explicit Card(const std::string &line);
+
+    void parse_set(std::vector<uint32_t> &set, std::istringstream &stream);
+    uint32_t get_matches_no() const;
+};
 
 int puzzle_sample_1(const std::string &base_file_path);
 

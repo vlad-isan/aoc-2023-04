@@ -69,13 +69,24 @@ int puzzle_2(const std::string &base_file_path) {
 }
 
 int do_puzzle_1(std::ifstream &file) {
+    std::vector<Card> cards;
     std::string line;
 
     while (std::getline(file, line)) {
-        fmt::println("{}", line);
+        cards.emplace_back(line);
     }
 
-    return 0;
+    uint32_t sum = 0;
+
+    for (const auto &card: cards) {
+        uint32_t matches = card.get_matches_no();
+
+        if (matches > 0) {
+            sum += std::pow(2, matches - 1);
+        }
+    }
+
+    return sum;
 }
 
 int do_puzzle_2(std::ifstream &file) {
@@ -86,4 +97,36 @@ int do_puzzle_2(std::ifstream &file) {
     }
 
     return 0;
+}
+
+Card::Card(const std::string &line) {
+    size_t colon_pos = line.find(':');
+    size_t bar_pos = line.find('|');
+
+    std::istringstream winning_stream{line.substr(colon_pos + 2, bar_pos - colon_pos - 2)};
+    std::istringstream no_stream{line.substr(bar_pos + 2)};
+
+    this->parse_set(this->winning_numbers, winning_stream);
+    this->parse_set(this->numbers, no_stream);
+}
+
+void Card::parse_set(std::vector<uint32_t> &set, std::istringstream &stream) {
+    std::string token;
+
+    while (getline(stream, token, ' ')) {
+        auto [beg, end] = std::ranges::remove(token, ' ');
+        token.erase(beg, end);
+
+        if (token.empty()) {
+            continue;
+        }
+
+        set.emplace_back(std::stoi(token));
+    }
+}
+
+uint32_t Card::get_matches_no() const {
+    return std::ranges::count_if(this->numbers, [&](auto &no) {
+        return std::ranges::find(this->winning_numbers, no) != this->winning_numbers.end();
+    });
 }
